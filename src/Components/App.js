@@ -12,7 +12,8 @@ import EditContact from "./EditContact";
 function App() {
   //const LOCAL_KEY = "contactsStorage";
   const [contacts, setContacts] = useState([]); //initially empty arr
-
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResult, setSearchResult] = useState([]);
   //func to get contacts from axios api
   const getContacts = async () => {
     const response = await api.get("contacts");
@@ -53,6 +54,21 @@ function App() {
     });
 
     setContacts(newContactList);
+  };
+
+  const searchHandler = (term) => {
+    console.log(term);
+    setSearchTerm(term);
+
+    if (term !== "") {
+      const newContactList = contacts.filter((contact) => {
+        return Object.values(contact)
+          .join(" ")
+          .toLowerCase()
+          .includes(term.toLowerCase());
+      });
+      setSearchResult(newContactList);
+    } else setSearchResult(contacts);
   };
 
   useEffect(() => {
@@ -104,8 +120,10 @@ function App() {
             // }}
             element={
               <ContactList
-                contact={contacts}
-                getContactId={removeContactHandler}
+                contact={searchTerm.length < 1 ? contacts : searchResult} //whenever search term is present, this updates the render
+                getContactId={removeContactHandler} //bcz render is affected by useStates
+                term={searchTerm}
+                search={searchHandler}
               />
             }
           />
